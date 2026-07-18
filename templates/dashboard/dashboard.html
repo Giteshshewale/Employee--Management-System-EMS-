@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - EMS{% endblock %}
+{% block content %}
+<h3 class="mb-4">Dashboard</h3>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card blue">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small">Total Employees</div>
+                    <h2>{{ total_employees }}</h2>
+                </div>
+                <i class="bi bi-people-fill fs-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card purple">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small">Departments</div>
+                    <h2>{{ total_departments }}</h2>
+                </div>
+                <i class="bi bi-building fs-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card green">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small">Active Employees</div>
+                    <h2>{{ active_employees }}</h2>
+                </div>
+                <i class="bi bi-person-check-fill fs-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card red">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small">Inactive Employees</div>
+                    <h2>{{ inactive_employees }}</h2>
+                </div>
+                <i class="bi bi-person-x-fill fs-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card p-3">
+            <h5 class="mb-3">Recent Employees</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in recent_employees %}
+                    <tr>
+                        <td>{{ e.employee_id }}</td>
+                        <td><a href="{% url 'employees:detail' e.pk %}">{{ e.full_name }}</a></td>
+                        <td>{{ e.department.name|default:'-' }}</td>
+                        <td>{{ e.designation }}</td>
+                        <td>
+                            <span class="badge {% if e.status == 'active' %}badge-status-active{% else %}badge-status-inactive{% endif %}">
+                                {{ e.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted">No employees yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="mb-3">Quick Stats</h5>
+            <p class="mb-2"><i class="bi bi-calendar-x text-warning"></i> Pending leave requests: <strong>{{ pending_leaves }}</strong></p>
+            <a href="{% url 'employees:add' %}" class="btn btn-outline-primary btn-sm w-100 mb-2">+ Add Employee</a>
+            <a href="{% url 'departments:add' %}" class="btn btn-outline-secondary btn-sm w-100">+ Add Department</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Leaves - EMS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Leave Management</h3>
+    <a href="{% url 'leaves:apply' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Apply for Leave</a>
+</div>
+
+<div class="card p-3 mb-3">
+    <form method="get" class="row g-2">
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card p-3">
+    <table class="table table-hover align-middle">
+        <thead><tr><th>Employee</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th>{% if user.is_admin_role or user.is_hr_role %}<th>Actions</th>{% endif %}</tr></thead>
+        <tbody>
+        {% for l in page_obj %}
+            <tr>
+                <td>{{ l.employee.full_name }}</td>
+                <td>{{ l.from_date }}</td>
+                <td>{{ l.to_date }}</td>
+                <td>{{ l.days_requested }}</td>
+                <td>{{ l.reason|truncatewords:8 }}</td>
+                <td>
+                    <span class="badge {% if l.status == 'approved' %}bg-success{% elif l.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                        {{ l.get_status_display }}
+                    </span>
+                </td>
+                {% if user.is_admin_role or user.is_hr_role %}
+                <td>
+                    {% if l.status == 'pending' %}
+                    <a href="{% url 'leaves:review' l.pk 'approve' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-check-lg"></i></a>
+                    <a href="{% url 'leaves:review' l.pk 'reject' %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i></a>
+                    {% else %}
+                    <span class="text-muted small">Reviewed</span>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="7" class="text-center text-muted">No leave requests.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if page_obj.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endfor %}
+            {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

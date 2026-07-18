@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Departments - EMS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Departments</h3>
+    {% if user.is_admin_role or user.is_hr_role %}
+    <a href="{% url 'departments:add' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Department</a>
+    {% endif %}
+</div>
+<div class="card p-3">
+    <table class="table table-hover align-middle">
+        <thead><tr><th>Name</th><th>Description</th><th>Employees</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for d in departments %}
+            <tr>
+                <td>{{ d.name }}</td>
+                <td>{{ d.description|default:'-'|truncatewords:15 }}</td>
+                <td><span class="badge bg-info">{{ d.employee_count }}</span></td>
+                <td>
+                    {% if user.is_admin_role or user.is_hr_role %}
+                    <a href="{% url 'departments:edit' d.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'departments:delete' d.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">No departments yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Attendance - EMS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Attendance</h3>
+    {% if user.is_admin_role or user.is_hr_role %}
+    <a href="{% url 'attendance:mark' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Mark Attendance</a>
+    {% endif %}
+</div>
+
+<div class="card p-3 mb-3">
+    <form method="get" class="row g-2">
+        <div class="col-md-4">
+            <select name="employee" class="form-select">
+                <option value="">All Employees</option>
+                {% for e in employees %}
+                <option value="{{ e.id }}" {% if selected_employee == e.id|stringformat:"s" %}selected{% endif %}>{{ e.full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="date" name="date" value="{{ selected_date }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card p-3">
+    <table class="table table-hover align-middle">
+        <thead><tr><th>Employee</th><th>Date</th><th>Status</th>{% if user.is_admin_role or user.is_hr_role %}<th>Actions</th>{% endif %}</tr></thead>
+        <tbody>
+        {% for a in page_obj %}
+            <tr>
+                <td>{{ a.employee.full_name }}</td>
+                <td>{{ a.date }}</td>
+                <td>
+                    <span class="badge {% if a.status == 'present' %}bg-success{% elif a.status == 'absent' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                        {{ a.get_status_display }}
+                    </span>
+                </td>
+                {% if user.is_admin_role or user.is_hr_role %}
+                <td><a href="{% url 'attendance:delete' a.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a></td>
+                {% endif %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">No attendance records.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if page_obj.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endfor %}
+            {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
